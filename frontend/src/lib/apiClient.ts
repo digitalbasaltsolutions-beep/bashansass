@@ -5,7 +5,19 @@ const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
 });
 
-// Request interceptor to add the auth token header to requests
+// Track whether we're currently refreshing to prevent loops
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (v: any) => void; reject: (e: any) => void }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
+  });
+  failedQueue = [];
+};
+
+// Request interceptor — attach access token to every request
 apiClient.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
@@ -14,15 +26,13 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh / logout
+// Response interceptor — unwrap standard response format and handle auth errors
 apiClient.interceptors.response.use(
   (response) => {
-    // If the response is in our standardized format, unwrap it
+    // Unwrap standardized { success, data, meta } format
     if (response.data && response.data.success !== undefined && response.data.data !== undefined) {
       return response.data;
     }
@@ -30,28 +40,58 @@ apiClient.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
-    // Normalize error object for the frontend
+
+    // Normalize error for catch blocks in pages
     const errorData = error.response?.data?.error || {
-      message: error.message || 'An unexpected error occurred',
-      statusCode: error.response?.status || 500
+      message: error.response?.data?.message || error.message || 'An unexpected error occurred',
+      statusCode: error.response?.status || 500,
     };
-    
-    // Add normalized error to the error object for catch blocks
     (error as any).apiError = errorData;
 
-    // Handle 401 scenarios
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Handle 401 Unauthorized — try to refresh the token once
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+      // If already refreshing, queue the request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        });
+      }
+
       originalRequest._retry = true;
-      const { accessToken, logout } = useAuthStore.getState();
-      // Only logout if we actually have a token (prevent loop)
-      if (accessToken) {
+      isRefreshing = true;
+
+      const { refreshToken, setCredentials, logout } = useAuthStore.getState();
+
+      if (!refreshToken) {
         logout();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
+        if (typeof window !== 'undefined') window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        // Attempt token refresh
+        const res = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/refresh`,
+          { refreshToken }
+        );
+        const { accessToken: newAccess, refreshToken: newRefresh, user, subscriptions, plan } = res.data;
+        setCredentials(newAccess, newRefresh, user, subscriptions, plan);
+        processQueue(null, newAccess);
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        logout();
+        if (typeof window !== 'undefined') window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );

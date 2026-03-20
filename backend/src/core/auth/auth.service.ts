@@ -121,7 +121,7 @@ export class AuthService {
 
   private async generateTokens(userId: string, organizationId: string | undefined, email: string, role: string, isOnboarded: boolean = true) {
     const payload = { sub: userId, email, organizationId, role, isOnboarded };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '8h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     // Store refresh token in Redis for validation/logout
