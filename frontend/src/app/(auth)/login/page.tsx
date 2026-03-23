@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import apiClient from '@/lib/apiClient';
-import { Mail, Lock } from 'lucide-react';
+import { Mail, Lock, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -40,21 +41,22 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)' }}></div>
         
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center space-x-3 mb-auto">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center relative">
+          <Link href="/" className="flex items-center space-x-3 mb-auto group w-fit hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center relative group-hover:scale-110 transition-transform">
               <div className="absolute -top-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <span className="text-xl font-bold tracking-wide">YOUR<br/><span className="text-blue-200">LOGO</span></span>
-          </div>
+            <span className="text-xl font-bold tracking-wide transition-colors">YOUR<br/><span className="text-blue-200">LOGO</span></span>
+          </Link>
 
           <div className="my-16">
             <h1 className="text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">Hello,<br/>welcome!</h1>
             <p className="text-blue-100 max-w-sm mb-10 text-sm opacity-90 leading-relaxed font-light">
               Log in to the Business OS. Start tracking your deals, managing your contacts, and scaling your organization securely.
             </p>
-            <button className="bg-white text-blue-900 px-8 py-3 rounded-full font-semibold text-sm hover:bg-gray-100 transition shadow-lg w-fit">
-              View more
-            </button>
+            <Link href="/" className="inline-flex items-center gap-2 bg-white/10 text-white border border-white/20 px-8 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-blue-900 transition-all shadow-lg w-fit group">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
           </div>
         </div>
       </div>
@@ -109,16 +111,16 @@ export default function LoginPage() {
             </div>
 
             <div className="text-xs font-semibold">
-              <a href="#" className="text-blue-600 hover:text-blue-500">
+              <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800 transition-colors hover:underline">
                 Forgot password?
-              </a>
+              </Link>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-4 px-4 mt-8 rounded-xl shadow-md text-sm font-bold text-blue-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+            className="w-full flex justify-center py-4 px-4 mt-8 rounded-xl shadow-md text-sm font-bold text-blue-700 bg-white hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all active:scale-95 duration-200 cursor-pointer disabled:cursor-not-allowed"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
@@ -128,7 +130,7 @@ export default function LoginPage() {
             <button 
               type="button"
               onClick={() => router.push('/register')}
-              className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg text-sm font-bold text-white focus:outline-none transition-all"
+              className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg text-sm font-bold text-white hover:shadow-xl hover:-translate-y-0.5 active:scale-95 focus:outline-none transition-all duration-200 cursor-pointer"
               style={{ background: 'linear-gradient(90deg, #031B5B 0%, #0A4BD4 100%)' }}
             >
               Sign up

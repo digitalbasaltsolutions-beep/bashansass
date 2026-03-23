@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import apiClient from '@/lib/apiClient';
-import { Mail, Lock, User, Building } from 'lucide-react';
+import { Mail, Lock, User, Building, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
@@ -46,18 +47,22 @@ export default function RegisterPage() {
         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)' }}></div>
         
         <div className="relative z-10 flex flex-col h-full">
-          <div className="flex items-center space-x-3 mb-auto">
-            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center relative">
+          <Link href="/" className="flex items-center space-x-3 mb-auto group w-fit hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center relative group-hover:scale-110 transition-transform">
               <div className="absolute -top-1 -left-1 w-2 h-2 bg-white rounded-full"></div>
             </div>
-            <span className="text-xl font-bold tracking-wide">YOUR<br/><span className="text-blue-200">LOGO</span></span>
-          </div>
+            <span className="text-xl font-bold tracking-wide transition-colors">YOUR<br/><span className="text-blue-200">LOGO</span></span>
+          </Link>
 
           <div className="my-16">
             <h1 className="text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">Join us,<br/>today!</h1>
             <p className="text-blue-100 max-w-sm mb-10 text-sm opacity-90 leading-relaxed font-light">
               Create an account to set up your organization and gain full access to our powerful Business OS suite.
             </p>
+            <Link href="/" className="inline-flex items-center gap-2 bg-white/10 text-white border border-white/20 px-8 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-blue-900 transition-all shadow-lg w-fit group">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
           </div>
         </div>
       </div>
@@ -101,13 +106,13 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full flex justify-center py-4 px-4 mt-6 rounded-xl shadow-md text-sm font-bold text-blue-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+          <button type="submit" disabled={loading} className="w-full flex justify-center py-4 px-4 mt-6 rounded-xl shadow-md text-sm font-bold text-blue-700 bg-white hover:bg-blue-50 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all cursor-pointer disabled:cursor-not-allowed">
             {loading ? 'Registering...' : 'Create Account'}
           </button>
 
           <div className="mt-8 pt-6 text-center text-xs font-semibold text-gray-500 border-t border-gray-200">
             <p className="mb-4">Already have an account?</p>
-            <button type="button" onClick={() => router.push('/login')} className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg text-sm font-bold text-white focus:outline-none transition-all" style={{ background: 'linear-gradient(90deg, #031B5B 0%, #0A4BD4 100%)' }}>
+            <button type="button" onClick={() => router.push('/login')} className="w-full flex justify-center py-4 px-4 rounded-xl shadow-lg text-sm font-bold text-white hover:shadow-xl hover:-translate-y-0.5 active:scale-95 duration-200 focus:outline-none transition-all cursor-pointer" style={{ background: 'linear-gradient(90deg, #031B5B 0%, #0A4BD4 100%)' }}>
               Sign in
             </button>
           </div>
